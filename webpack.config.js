@@ -1,47 +1,12 @@
-const path = require('path');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const { CleanWebpackPlugin } = require('clean-webpack-plugin');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const { merge } = require("webpack-merge");
+const commonConfig = require("./build_utils/basic.config.js");
+const developmentConfig = require("./build_utils/development.config.js");
+const productionConfig = require("./build_utils/production.config.js");
 
-module.exports = env => {
-    console.log("ENV: ", env)
-    return {
-        context: path.resolve(__dirname, 'src'),
-        mode: env.production === true ? "production" : "development",
-        entry: "./index.js",
-        output: {
-            path: path.resolve(__dirname, 'dist'),
-            filename: "bundle.js"
-        },
-        module: {
-            rules: [
-                {
-                    test: /\.js$/,
-                    exclude: /node_modules/,
-                    use: ['babel-loader']
-                },
-                {
-                    test: /\.css$/,
-                    use: ['style-loader', 'css-loader', 'postcss-loader']  //MiniCssExtractPlugin.loader
-                }
-            ]
-        },
-        plugins: [
-            new HtmlWebpackPlugin({
-                filename: "index.html", 
-                template: './index.html', 
-                inject: 'body'
-            }),
-            new CleanWebpackPlugin(),
-            new MiniCssExtractPlugin(),
-        ],
-        devServer: {
-            port: env.port,
-            clientLogLevel: 'error',
-            compress: true,
-            contentBase: './dist',
-            stats: 'errors-only'
-        }
-    }
-    
+module.exports = (env) => {
+  if (env.production === "true") {
+    return merge(commonConfig(env), productionConfig(env));
+  } else {
+    return merge(commonConfig(env), developmentConfig(env));
+  }
 };
